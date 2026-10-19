@@ -1,0 +1,13 @@
+{
+  "name": "StartNG Star Runner",
+  "slug": "star-runner",
+  "version": "1.0.0",
+  "entry": "index.html",
+  "engine": "three.js 0.160.0 (CDN, no build step)",
+  "permissions": ["user:read", "theme:read", "leaderboard:write"],
+  "capabilities": {
+    "auth": "Reads logged-in StartNG user via window.__STARTNG_USER__ / StartNG SDK / iframe postMessage STARTNG:GET_USER / ?username= / localStorage / GET /api/me",
+    "theming": "Central styling via --startng-primary / --startng-accent CSS vars, body[data-primary], ?primary=&accent=, localStorage startng:theme, postMessage STARTNG:THEME — live-applied to character suit",
+    "scores": "Submits via StartNG.submitScore / postMessage STARTNG:SCORE / POST {apiBase}/scores + per-user localStorage best"
+  }
+}

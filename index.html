@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>StartNG Star Runner — Three.js Game</title>
+<meta name="description" content="A Three.js endless runner for start.ng. Logged-in StartNG user + central styling drives the character suit." />
+<link rel="stylesheet" href="styles.css" />
+<script type="importmap">
+{ "imports": {
+  "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+} }
+</script>
+</head>
+<body>
+<div id="app">
+  <div id="game"></div>
+  <div id="vignette"></div>
+  <div id="speedlines"></div>
+  <div id="floaters"></div>
+
+  <header id="topbar">
+    <div id="brand">🌟 <b>STAR RUNNER</b> <span class="on-startng">on start.ng</span></div>
+    <div id="progress-wrap" title="11km bridge progress"><div id="progress-fill"></div><span id="progress-txt">11.0km left</span></div>
+    <div id="user-chip"><img alt="" style="display:none"/><span class="uname">…</span></div>
+    <div id="top-actions">
+      <button id="theme-btn" title="Cycle central theme (re-skins suit)">🎨 Theme</button>
+      <button id="board-btn" title="Leaderboard">🏆</button>
+      <button id="mute-btn" title="Mute">🔊</button>
+      <button id="settings-btn" title="Settings">⚙</button>
+      <button id="logout-btn" title="Log out via StartNG">⏻</button>
+    </div>
+  </header>
+
+  <div id="hud" class="hidden">
+    <div class="stat">SCORE <b id="score">0</b></div>
+    <div class="stat" id="stars">★ 0</div>
+    <div class="stat combo hidden" id="combo">x2 COMBO</div>
+    <div class="stat" id="dist">0m</div>
+    <div class="stat hidden" id="boost-tag">⚡ BOOST</div>
+    <div class="stat dim" id="best-line">BEST 0</div>
+    <div id="boost-meter" title="Boost charge"><div id="boost-fill"></div></div>
+    <button id="pause-btn" aria-label="Pause or resume">Pause</button>
+  </div>
+
+  <div id="touch">
+    <button id="left-btn" aria-label="Steer left">◀</button>
+    <button id="boost-btn" aria-label="Boost">BOOST</button>
+    <button id="jump-btn" aria-label="Jump">⤒</button>
+    <button id="right-btn" aria-label="Steer right">▶</button>
+  </div>
+
+  <div id="gate" class="show">
+    <div class="gate-card">
+      <h1 id="gate-title">Welcome, rider</h1>
+      <p id="gate-sub">Log in with StartNG to save scores — or play as guest.</p>
+      <p class="hint">Your <b>StartNG username</b> floats above your rider.<br/>The <b>central theme colour</b> is your suit. <span class="dbl">(double-click card to test)</span></p>
+      <div id="swatches"></div>
+      <div id="login-row">
+        <button id="startng-login-btn" class="primary">Log in with StartNG</button>
+        <button id="startng-signup-btn">Sign up</button>
+        <button id="demo-toggle">demo name</button>
+      </div>
+      <div id="demo-row" class="hidden">
+        <input id="demo-name" placeholder="Demo username e.g. Ada" maxlength="14"/>
+        <button id="demo-play-btn">Use name</button>
+      </div>
+      <div class="row">
+        <button id="play-btn" class="primary big">▶ RIDE</button>
+        <button id="guest-btn">guest ride</button>
+        <button id="how-btn">?</button>
+      </div>
+      <div id="how" class="hidden">◀ ▶ / A D steer · Space jump · Shift boost (10★) · P pause.<br/>Dodge cones & barriers — tall blue trucks can't be jumped!<br/>Near-miss = bonus. 11km = legend.</div>
+      <div id="missions"></div>
+    </div>
+  </div>
+
+  <div id="over" class="hidden">
+    <div class="gate-card">
+      <h1>💥 Wipeout!</h1>
+      <div id="rank" class="rank">RANK C</div>
+      <div id="newbest" class="hidden">🏆 NEW BEST!</div>
+      <div class="final"><span id="final-score">0</span><small id="final-stars">★ 0</small></div>
+      <div id="stats-grid"></div>
+      <div id="guest-cta" class="hidden">Playing as guest — sign in to save your score to StartNG.</div>
+      <div class="row over-actions">
+        <button id="again-btn" class="primary big">↻ RIDE AGAIN</button>
+        <button id="menu-btn">menu</button>
+        <button id="share-btn">share</button>
+      </div>
+      <div class="row over-auth hidden" id="over-auth">
+        <button id="over-login-btn" class="primary">Log in</button>
+        <button id="over-signup-btn">Sign up</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="pause-menu" class="hidden overlay"><div class="gate-card">
+    <h1>⏸ Paused</h1>
+    <div class="row"><button id="resume-btn" class="primary">▶ Resume</button><button id="restart-btn">↻ Restart</button><button id="quit-btn">menu</button></div>
+    <div class="row"><button id="pause-mute">🔊 sound</button><button id="pause-quality">✨ quality: high</button></div>
+  </div></div>
+
+  <div id="settings-drawer" class="hidden overlay"><div class="gate-card">
+    <h1>⚙ Settings</h1>
+    <label><input type="checkbox" id="set-shake" checked/> Screen shake</label>
+    <label><input type="checkbox" id="set-flash" checked/> Flash effects</label>
+    <label><input type="checkbox" id="set-haptics" checked/> Vibration</label>
+    <label>Quality <select id="set-quality"><option>low</option><option selected>high</option><option>ultra</option></select></label>
+    <div class="row"><button id="settings-close" class="primary">Done</button></div>
+  </div></div>
+
+  <div id="board-drawer" class="hidden overlay"><div class="gate-card">
+    <h1>🏆 Leaderboard</h1>
+    <div id="board-list"></div>
+    <div id="board-save-note"></div>
+    <div class="row"><button id="board-close" class="primary">Close</button></div>
+  </div></div>
+
+  <div id="toast"></div>
+</div>
+<script type="module" src="src/main.js"></script>
+</body>
+</html>
+
